@@ -1,5 +1,6 @@
 ﻿/* Dictionary.cs
  * Author: Rod Howell
+ * Edited by Valeria Morinigo
  */
 using System;
 using System.Collections.Generic;
@@ -137,6 +138,84 @@ namespace Ksu.Cis300.NameLookup
         {
             CheckKey(k);
             _elements = Add(_elements, k, v);
+        }
+        /// <summary>
+        /// his method should return the result of removing the node with smallest Key (as determined by positioning within the binary search tree) from the given binary search tree. 
+        /// The out parameter should be set to the pair removed. 
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="min"></param>
+        /// <returns></returns>
+        private static BinaryTreeNode<KeyValuePair<TKey, TValue>> RemoveMininumKey(BinaryTreeNode<KeyValuePair<TKey, TValue>> t, out KeyValuePair<TKey, TValue> min)
+        {
+            if(t.LeftChild == null)
+            {
+                min = t.Data;
+                return t.RightChild;
+            }
+            else
+            {
+                BinaryTreeNode<KeyValuePair<TKey, TValue>> result = RemoveMininumKey(t.LeftChild, out min);
+                return new BinaryTreeNode<KeyValuePair<TKey, TValue>>(t.Data, result, t.RightChild);
+            }
+            
+        }
+        /// <summary>
+        /// This method should return the result of removing the node containing the given key from the given binary search tree. 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="t"></param>
+        /// <param name="removed"></param>
+        /// <returns></returns>
+        private static BinaryTreeNode<KeyValuePair<TKey, TValue>> Remove(TKey key, BinaryTreeNode<KeyValuePair<TKey, TValue>> t, out bool removed)
+        {
+            if(t == null)
+            {
+                removed = false;
+                return null;
+            }
+            else
+            {
+                int comp = key.CompareTo(t.Data.Key);
+                if (comp == 0)
+                {
+                    removed = true;
+                    if (t.LeftChild == null)
+                    {
+                        return t.RightChild;
+                    }
+                    else if (t.RightChild == null)
+                    {
+                        return t.LeftChild;
+                    }
+                    else
+                    {
+                        BinaryTreeNode<KeyValuePair<TKey, TValue>> result = RemoveMininumKey(t.RightChild, out KeyValuePair<TKey,TValue> min);
+                        return new BinaryTreeNode<KeyValuePair<TKey, TValue>>(min, t.LeftChild, result);
+                    }
+                }
+                else if (comp < 0)
+                {
+                    BinaryTreeNode<KeyValuePair<TKey, TValue>> result = Remove(key, t.LeftChild, out removed);
+                    return new BinaryTreeNode<KeyValuePair<TKey, TValue>>(t.Data, result , t.RightChild);
+                }
+                else
+                {
+                    BinaryTreeNode<KeyValuePair<TKey, TValue>> result = Remove(key, t.RightChild, out removed);
+                    return new BinaryTreeNode<KeyValuePair<TKey, TValue>>(t.Data, t.LeftChild, result);
+                }
+            }
+        }
+        /// <summary>
+        ///  Remove the given key and its associated value from the dictionary using the above method. 
+        /// </summary>
+        /// <param name="k"></param>
+        /// <returns> Whether the key was found </returns>
+        public bool Remove(TKey k)
+        {
+            CheckKey(k);
+            _elements = Remove(k, _elements, out bool removed);
+            return removed;
         }
     }
 }
